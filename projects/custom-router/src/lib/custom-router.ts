@@ -26,8 +26,10 @@ export class CustomRouter extends Router implements OnDestroy {
 
   constructor(@Inject(APP_BASE_HREF) private baseHref: string, title: Title) {
     super();
+    let scrollPosition = {x: 0, y: 0};
     this.subscription = this.events.pipe(
       filter(event => event instanceof NavigationStart),
+      tap(() => scrollPosition = {x: window.scrollX, y: window.scrollY}),
       switchMap(event => {
         const currentNavigation = this.getCurrentNavigation();
         const state = currentNavigation?.extras.state;
@@ -37,7 +39,7 @@ export class CustomRouter extends Router implements OnDestroy {
       })
     ).subscribe(currentNavigation => {
       if (!this.navigateByUrlActive) {
-        this.history.push(new HistoryEntry(this.createNavigationId(), currentNavigation?.extras.state, title.getTitle(), this.url, {x: window.scrollX, y: window.scrollY}));
+        this.history.push(new HistoryEntry(this.createNavigationId(), currentNavigation?.extras.state, title.getTitle(), this.url, scrollPosition));
         this.currentIndex = this.history.length - 1;
       }
     });
