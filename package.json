@@ -1,7 +1,7 @@
 {
-  "name": "angular.io-example",
-  "version": "0.0.0",
-  "description": "Example project from an angular.io guide.",
+  "name": "custom-router",
+  "version": "1.0.0",
+  "description": "Custom router implementation.",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
