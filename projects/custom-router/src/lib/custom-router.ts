@@ -10,7 +10,8 @@ class HistoryEntry {
     public id: number,
     public state: any,
     public title: string,
-    public url: string
+    public url: string,
+    public scrollPosition: { x: number, y: number }
   ) {}
 }
 
@@ -36,7 +37,7 @@ export class CustomRouter extends Router implements OnDestroy {
       })
     ).subscribe(currentNavigation => {
       if (!this.navigateByUrlActive) {
-        this.history.push(new HistoryEntry(this.createNavigationId(), currentNavigation?.extras.state, title.getTitle(), this.url));
+        this.history.push(new HistoryEntry(this.createNavigationId(), currentNavigation?.extras.state, title.getTitle(), this.url, {x: window.scrollX, y: window.scrollY}));
         this.currentIndex = this.history.length - 1;
       }
     });
@@ -58,7 +59,10 @@ export class CustomRouter extends Router implements OnDestroy {
     if(item) {
       this.navigateByUrlActive = true;
       return from(this.navigateByUrl(item.url, options)).pipe(
-        tap(() => this.navigateByUrlActive = false)
+        tap(() => {
+          window.scrollTo(item.scrollPosition.x || 0, item.scrollPosition.y || 0); // Restore scroll positions
+          this.navigateByUrlActive = false;
+        })
       );
     }
     return of(event);
@@ -104,7 +108,7 @@ export class CustomRouter extends Router implements OnDestroy {
   public pushState(state: any, title: string, url: string): void {
     this.navigateByUrlActive = true;
     this.navigateByUrl(url).then(() => {
-      this.history.push(new HistoryEntry(this.createNavigationId(), state, title, url));
+      this.history.push(new HistoryEntry(this.createNavigationId(), state, title, url, { x: window.scrollX, y: window.scrollY })); // Save scroll positions
       this.currentIndex = this.history.length - 1;
       this.navigateByUrlActive = false;
     });
@@ -113,7 +117,7 @@ export class CustomRouter extends Router implements OnDestroy {
   public replaceState(state: any, title: string, url: string): void {
     this.navigateByUrlActive = true;
     this.navigateByUrl(url).then(() => {
-      this.history[this.currentIndex] = new HistoryEntry(this.createNavigationId(), state, title, url);
+      this.history[this.currentIndex] = new HistoryEntry(this.createNavigationId(), state, title, url, { x: window.scrollX, y: window.scrollY });
       this.navigateByUrlActive = false;
     });
   }
